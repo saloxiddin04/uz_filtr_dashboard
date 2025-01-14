@@ -23,7 +23,7 @@ const MainLayout = ({
     <Sidenav
       color={sidenavColor}
       brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-      brandName="Material Dashboard 2"
+      brandName="Uz Filtr Dashboard"
       routes={routes}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

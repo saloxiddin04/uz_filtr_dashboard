@@ -191,15 +191,25 @@ import AuthLayout from "layouts/AuthLayout";
 import routes from "routes";
 import SignIn from "./layouts/authentication/sign-in";
 import SignUp from "./layouts/authentication/sign-up";
-import { useMaterialUIController } from "./context";
+import { setOpenConfigurator, useMaterialUIController, setMiniSidenav } from "./context";
 import { useState } from "react";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
-  const { darkMode } = controller;
+  const {
+    miniSidenav,
+    direction,
+    openConfigurator,
+    sidenavColor,
+    transparentSidenav,
+    whiteSidenav,
+    darkMode,
+  } = controller;
   const [onMouseEnter, setOnMouseEnter] = useState(false);
   const isAuthenticated = true;
   const layout = "dashboard";
+
+  const handleConfiguratorOpen = () => setOpenConfigurator(dispatch, !openConfigurator);
 
   const getRoutes = (allRoutes) =>
     allRoutes.map((route) => {
@@ -214,6 +224,20 @@ export default function App() {
       return null;
     });
 
+  const handleOnMouseEnter = () => {
+    if (miniSidenav && !onMouseEnter) {
+      setMiniSidenav(dispatch, false);
+      setOnMouseEnter(true);
+    }
+  };
+
+  const handleOnMouseLeave = () => {
+    if (onMouseEnter) {
+      setMiniSidenav(dispatch, true);
+      setOnMouseEnter(false);
+    }
+  };
+
   return (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <Routes>
@@ -224,7 +248,18 @@ export default function App() {
         <Route
           element={
             <ProtectedRoutes isAuthenticated={isAuthenticated}>
-              <MainLayout layout={layout} />
+              <MainLayout
+                sidenavColor={sidenavColor}
+                transparentSidenav={transparentSidenav}
+                whiteSidenav={whiteSidenav}
+                darkMode={darkMode}
+                brandWhite=""
+                brandDark=""
+                onMouseEnter={handleOnMouseEnter}
+                onMouseLeave={handleOnMouseLeave}
+                handleConfiguratorOpen={handleConfiguratorOpen}
+                layout={layout}
+              />
             </ProtectedRoutes>
           }
         >
