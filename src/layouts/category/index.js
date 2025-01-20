@@ -15,7 +15,7 @@ import DataTable from "examples/Tables/DataTable";
 import { useDispatch, useSelector } from "react-redux";
 import { createCategory, getAllCategories } from "../../redux/categories/categorySlice";
 import MDButton from "../../components/MDButton";
-import { Modal, useTheme } from "@mui/material";
+import { FormControl, InputLabel, Modal, Select, useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import MDInput from "../../components/MDInput";
@@ -24,14 +24,15 @@ import AppBar from "@mui/material/AppBar";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import PropTypes from "prop-types";
+import MenuItem from "@mui/material/MenuItem";
 
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 600,
-  bgcolor: 'background.paper',
+  bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
 };
@@ -63,22 +64,23 @@ TabPanel.propTypes = {
 };
 
 function Category() {
-  const theme = useTheme()
-  const dispatch = useDispatch()
+  const theme = useTheme();
+  const dispatch = useDispatch();
   
-  const {loading, categories} = useSelector((state) => state.category)
+  const { loading, categories } = useSelector((state) => state.category);
   
-  const [open, setOpen] = useState(false)
-  const [tab, setTab] = useState(0)
+  const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState(0);
   
-  const [name, setName] = useState(null)
+  const [name, setName] = useState(null);
+  const [parent, setParent] = useState(null);
   
   useEffect(() => {
-    dispatch(getAllCategories())
+    dispatch(getAllCategories());
   }, [dispatch]);
   
-  const handleClose = () => setOpen(false)
-  const handleOpen = () => setOpen(true)
+  const handleClose = () => setOpen(false);
+  const handleOpen = () => setOpen(true);
   
   const columns = [
     { Header: "ID", accessor: "id", align: "left" },
@@ -93,21 +95,23 @@ function Category() {
   })) || [];
   
   const handleChangeTab = (event, newValue) => {
-    setTab(newValue)
-  }
+    setTab(newValue);
+  };
   
   const handleCreateCategory = () => {
-    if (!name) return toast.error('All inputs requires')
+    if (!name || (tab === 2 && !parent)) return toast.error("All inputs requires");
     
-    dispatch(createCategory({ name, parent: '' })).then(({payload}) => {
+    dispatch(createCategory({ name, parent })).then(({ payload }) => {
       if (payload?.id) {
-        toast.success('Created')
-        dispatch(getAllCategories())
-        handleClose()
-        setName(null)
+        toast.success("Created");
+        dispatch(getAllCategories());
+        handleClose();
+        setName(null);
+        setParent(null)
+        setTab(0)
       }
-    }).catch((e) => console.log(e.message))
-  }
+    }).catch((e) => console.log(e.message));
+  };
   
   return (
     <DashboardLayout>
@@ -196,7 +200,48 @@ function Category() {
                 </MDBox>
               </TabPanel>
               <TabPanel value={tab} index={1} dir={theme.direction}>
-                Item Two
+                <MDBox p={1}>
+                  <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-label">Parent Category</InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      value={parent || ""}
+                      label="Parent Category"
+                      placeholder="Parent Category"
+                      onChange={(e) => setParent(e.target.value)}
+                      sx={{
+                        borderRadius: '8px',
+                        padding: '12px',
+                        '& .MuiSelect-icon': {
+                          color: 'primary.main',
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: 'primary.main',
+                        },
+                      }}
+                    >
+                      {categories?.map((item) => (
+                        <MenuItem value={item?.id} key={item?.id}>{item?.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </MDBox>
+                <MDBox p={1}>
+                  <MDInput
+                    value={name || ""}
+                    onChange={(e) => setName(e.target.value)}
+                    type="text"
+                    label="Category name"
+                    fullWidth
+                  />
+                  
+                  <MDBox pt={2} display="flex" justifyContent="flex-end">
+                    <MDButton pt={2} onClick={handleCreateCategory} variant="gradient" color="info">
+                      Create category
+                    </MDButton>
+                  </MDBox>
+                </MDBox>
               </TabPanel>
             </Card>
           </Grid>
