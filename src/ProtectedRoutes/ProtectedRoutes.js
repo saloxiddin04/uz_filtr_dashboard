@@ -1,13 +1,12 @@
-import { Navigate } from "react-router-dom";
-import PropTypes from "prop-types";
+import React from "react";
+import { Outlet, Navigate } from "react-router-dom";
+import {useSelector} from 'react-redux';
 
-const ProtectedRoutes = ({ children, isAuthenticated }) => {
-  return isAuthenticated ? children : <Navigate to="/login" />;
-};
-
-ProtectedRoutes.propTypes = {
-  children: PropTypes.node.isRequired,
-  isAuthenticated: PropTypes.bool.isRequired,
+const ProtectedRoutes = () => {
+  const {user, loading} = useSelector((state) => state.user);
+  
+  return !loading && (user ? <Outlet/> : <Navigate to="/login" replace/>)
+  
 };
 
 export default ProtectedRoutes;
