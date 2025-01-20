@@ -1,33 +1,7 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import { useState } from "react";
-
-// react-router-dom components
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
 
 // @mui material components
 import Card from "@mui/material/Card";
-import Switch from "@mui/material/Switch";
-import Grid from "@mui/material/Grid";
-import MuiLink from "@mui/material/Link";
-
-// @mui icons
-import FacebookIcon from "@mui/icons-material/Facebook";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import GoogleIcon from "@mui/icons-material/Google";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -40,12 +14,53 @@ import BasicLayout from "layouts/authentication/components/BasicLayout";
 
 // Images
 import bgImage from "assets/images/bg-sign-in-basic.jpeg";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { getUserDetail, login, setAccess, setRefresh, setUser } from "../../../redux/auth/authSlice";
 
 function Basic() {
-  const [rememberMe, setRememberMe] = useState(false);
-
-  const handleSetRememberMe = () => setRememberMe(!rememberMe);
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  
+  const [phone_number, setPhoneNumber] = useState("+998");
+  const [password, setPassword] = useState(null);
+  
+  const handlePhone = (e) => {
+    const inputValue = e.target.value;
+    
+    if (inputValue.startsWith("+998")) {
+      const sanitizedValue = inputValue.replace(/[^\d+]/g, "");
+      setPhoneNumber(sanitizedValue?.trim());
+    }
+  };
+  
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (!phone_number || !password) return;
+    
+    dispatch(login({ phone_number, password })).then(({ payload }) => {
+      if (payload?.access && payload?.refresh_token) {
+        dispatch(setAccess(payload));
+        dispatch(setRefresh(payload));
+        
+        // Fetch user details
+        dispatch(getUserDetail()).then((res) => {
+          if (res?.payload) {
+            dispatch(setUser(res.payload));
+            navigate("/dashboard");
+          } else {
+            console.error("Failed to fetch user details");
+          }
+        });
+      } else {
+        console.error("Login failed: No access token or refresh token received");
+      }
+    })
+      .catch((error) => {
+        console.error("Login error:", error);
+      });
+  };
+  
   return (
     <BasicLayout image={bgImage}>
       <Card>
@@ -67,42 +82,26 @@ function Basic() {
         <MDBox pt={4} pb={3} px={3}>
           <MDBox component="form" role="form">
             <MDBox mb={2}>
-              <MDInput type="email" label="Email" fullWidth />
+              <MDInput
+                value={phone_number || ""}
+                onChange={handlePhone}
+                type="text"
+                label="Phone Number"
+                fullWidth
+              />
             </MDBox>
             <MDBox mb={2}>
-              <MDInput type="password" label="Password" fullWidth />
-            </MDBox>
-            <MDBox display="flex" alignItems="center" ml={-1}>
-              <Switch checked={rememberMe} onChange={handleSetRememberMe} />
-              <MDTypography
-                variant="button"
-                fontWeight="regular"
-                color="text"
-                onClick={handleSetRememberMe}
-                sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
-              >
-                &nbsp;&nbsp;Remember me
-              </MDTypography>
+              <MDInput
+                value={password || ""}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
+                label="Password" fullWidth
+              />
             </MDBox>
             <MDBox mt={4} mb={1}>
-              <MDButton variant="gradient" color="info" fullWidth>
+              <MDButton onClick={handleLogin} variant="gradient" color="info" fullWidth>
                 sign in
               </MDButton>
-            </MDBox>
-            <MDBox mt={3} mb={1} textAlign="center">
-              <MDTypography variant="button" color="text">
-                Don&apos;t have an account?{" "}
-                <MDTypography
-                  component={Link}
-                  to="/signup"
-                  variant="button"
-                  color="info"
-                  fontWeight="medium"
-                  textGradient
-                >
-                  Sign up
-                </MDTypography>
-              </MDTypography>
             </MDBox>
           </MDBox>
         </MDBox>
