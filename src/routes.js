@@ -1,11 +1,14 @@
+import React from "react";
 import Dashboard from "layouts/dashboard";
 import Tables from "layouts/tables";
 import Billing from "layouts/billing";
 import Notifications from "layouts/notifications";
 import Profile from "layouts/profile";
+import Category from "layouts/category";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
+import CreateCategory from "./layouts/category/CreateCategory";
 
 const routes = [
   {
@@ -15,6 +18,22 @@ const routes = [
     icon: <Icon fontSize="small">dashboard</Icon>,
     route: "/dashboard",
     component: <Dashboard />,
+  },
+  {
+    type: "collapse",
+    name: "Categories",
+    key: "category",
+    icon: <Icon fontSize="small">list_alt_icon</Icon>,
+    route: "/category",
+    component: <Category />,
+  },
+  {
+    type: "",
+    name: "Categories",
+    key: "category",
+    icon: <Icon fontSize="small">list_alt_icon</Icon>,
+    route: "/category/create-category",
+    component: <CreateCategory />,
   },
   {
     type: "collapse",
